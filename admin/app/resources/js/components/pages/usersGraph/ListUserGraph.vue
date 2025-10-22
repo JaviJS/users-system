@@ -8,7 +8,7 @@
                 Listado de usuarios
             </p>
             <button
-                @click="goTo('/usuarios/crear')"
+                @click="goTo('/usuarios-graph/crear')"
                 class="w-full md:w-auto bg-primary text-white px-4 py-2 mt-2 rounded-md border-2 border-primary hover:border-primary-light hover:bg-primary-light transition duration-300 cursor-pointer"
             >
                 Nuevo usuario
@@ -62,7 +62,7 @@
                         <td class="py-3 px-6 text-center">
                             <div class="flex item-center justify-center gap-2">
                                 <button
-                                    @click="goTo(`/usuarios/${user.id}`)"
+                                    @click="goTo(`/usuarios-graph/${user.id}`)"
                                     class="w-4 transform hover:text-primary hover:scale-110 cursor-pointer tooltip"
                                 >
                                     <svg
@@ -90,7 +90,11 @@
                                     >
                                 </button>
                                 <button
-                                    @click="goTo(`/usuarios/${user.id}/editar`)"
+                                    @click="
+                                        goTo(
+                                            `/usuarios-graph/${user.id}/editar`
+                                        )
+                                    "
                                     class="w-4 transform hover:text-primary hover:scale-110 cursor-pointer tooltip"
                                 >
                                     <svg
@@ -180,10 +184,10 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import userService from "../../../services/user.service.js";
-import { handleErrors } from "../../../support/errors/handleErrors.js";
+import { handleErrorsGraph } from "../../../support/errors/handleErrors.js";
 import { notifySuccess } from "../../../support/helpers/notification.js";
 import Loading from "../../layout/Loading.vue";
-// import userGraphql from '../../services/user.graphql.js'
+import userGraphql from "../../../services/user.graphql.js";
 import Swal from "sweetalert2";
 
 const router = useRouter();
@@ -195,23 +199,12 @@ const loading = ref(false);
 const getUsers = async () => {
     loading.value = true;
     try {
-        const response = await userService.getUsers();
-
-        // const test = await userGraphql.getUsers();+
-        if (response?.status === false) {
-            throw {
-                response: {
-                    data: {
-                        message: response.message || "Error desconocido",
-                        code: response.code || 401,
-                    },
-                },
-            };
-        }
-
-        users.value = response.data;
+        users.value = [];
+        const response = await userGraphql.getUsers();
+        users.value = response;
+        console.log(users.value);
     } catch (err) {
-        handleErrors(err);
+        handleErrorsGraph(err);
     } finally {
         loading.value = false;
     }
@@ -249,7 +242,7 @@ const deleteUser = async (user) => {
         if (result.isConfirmed) {
             loading.value = true;
             try {
-                const response = await userService.deleteUser(user.id);
+                const response = await userGraphql.deleteUser(user.id);
 
                 if (response?.status === false) {
                     throw {
@@ -266,7 +259,7 @@ const deleteUser = async (user) => {
                 notifySuccess(response.message);
                 getUsers();
             } catch (err) {
-                handleErrors(err);
+                handleErrorsGraph(err);
             } finally {
                 loading.value = false;
             }

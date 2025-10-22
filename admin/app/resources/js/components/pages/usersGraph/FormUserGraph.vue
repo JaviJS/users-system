@@ -3,7 +3,7 @@
         <!-- Header -->
         <div class="flex flex-row justify-start items-center mb-6 my-auto">
             <button
-                @click="goTo('/usuarios')"
+                @click="goTo('/usuarios-graph')"
                 class="mr-2 px-3 py-3 rounded-full bg-primary text-white transform hover:bg-primary-light cursor-pointer"
             >
                 <svg
@@ -151,9 +151,9 @@ import { useRouter } from "vue-router";
 import axios from "axios";
 import rules from "../../../support/rules/fieldRules.js";
 import { notifySuccess } from "../../../support/helpers/notification.js";
-import { handleErrors } from "../../../support/errors/handleErrors.js";
+import { handleErrorsGraph } from "../../../support/errors/handleErrors.js";
 import Loading from "../../layout/Loading.vue";
-import userService from "../../../services/user.service.js";
+import userGraphql from '../../../services/user.graphql.js';
 
 const router = useRouter();
 const props = defineProps({
@@ -236,9 +236,12 @@ const validPhone = () => {
 const handleSubmit = async () => {
     loading.value = true;
     try {
-        const isValidName = validName();
-        const isValidEmail = validEmail();
-        const isValidPhone = validPhone();
+        // const isValidName = validName();
+        // const isValidEmail = validEmail();
+        // const isValidPhone = validPhone();
+        const isValidName = true;
+        const isValidEmail = true;
+        const isValidPhone = true;
 
         if (isValidName && isValidEmail && isValidPhone) {
             const data = {
@@ -260,10 +263,10 @@ const handleSubmit = async () => {
             }
 
             notifySuccess(response.message);
-            goTo("/usuarios");
+            goTo("/usuarios-graph");
         }
     } catch (err) {
-        handleErrors(err);
+        handleErrorsGraph(err);
     } finally {
         loading.value = false;
     }
@@ -271,35 +274,22 @@ const handleSubmit = async () => {
 
 const selectMethod = (data) => {
     if (props.title === "Crear") {
-        return userService.createUser(data);
+        return userGraphql.createUser(data);
     } else if (props.title === "Editar") {
-        return userService.updateUser(props.id, data);
+        return userGraphql.updateUser(props.id, data);
     }
 };
 
 const getUser = async () => {
     loading.value = true;
     try {
-        // const res = await axios.get('/users')
-        const response = await userService.getUser(props.id);
-
-        if (response?.status === false) {
-            throw {
-                response: {
-                    data: {
-                        message: response.message || "Error desconocido",
-                        code: response.code || 401,
-                    },
-                },
-            };
-        }
-
-        name.value = response.data.name;
-        email.value = response.data.email;
-        phone.value = response.data.phone;
+        const response = await userGraphql.getUser(props.id);
+        name.value = response.name;
+        email.value = response.email;
+        phone.value = response.phone;
     } catch (err) {
-        handleErrors(err);
-        goTo("/usuarios");
+        handleErrorsGraph(err);
+        goTo("/usuarios-graph");
     } finally {
         loading.value = false;
     }

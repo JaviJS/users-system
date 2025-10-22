@@ -84,7 +84,7 @@ class UserController extends Controller
             $user =  $user->update($request->all());
 
             if (!$user) {
-                throw new Exception('Error al eliminar a usuario.', 500);
+                throw new Exception('Error al modificar usuario.', 500);
             }
 
             return response()->json(['code' => 200, 'status' => true, 'message' => 'Usuario modificado con éxito.', 'data' => $user]);

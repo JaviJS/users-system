@@ -26,3 +26,28 @@ export const handleErrors = (error) => {
     notifyError("Ha ocurrido un error inesperado, intente mas tarde");
   }
 };
+
+export const handleErrorsGraph = (error) => {
+  let errorMessage = "";
+
+  if (
+    error &&
+    error.errors &&
+    Array.isArray(error.errors)
+  ) {
+    error.errors.forEach(err => {
+      if (err.extensions && err.extensions.validation) {
+        Object.values(err.extensions.validation).forEach(messages => {
+          errorMessage += messages.join("\n") + "\n";
+        });
+      }
+    });
+
+    notifyError(errorMessage.trim());
+  } else {
+    notifyError("Ha ocurrido un error inesperado, intente más tarde");
+  }
+};
+
+
+

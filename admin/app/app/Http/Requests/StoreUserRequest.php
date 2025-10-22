@@ -24,8 +24,8 @@ class StoreUserRequest extends FormRequest
         $userId = $this->route('id');
 
         $rules = [
-            'name'  => ['required', 'regex:/^[a-zA-ZñÑáéíóúüÁÉÍÓÚÜ ]+$/u'], 
-            'email' => ['required', 'email', 'unique:users,email,'. $userId], 
+            'name'  => ['required', 'regex:/^[a-zA-ZñÑáéíóúüÁÉÍÓÚÜ ]+$/u', 'max:255'], 
+            'email' => ['required', 'email', 'unique:users,email,'. $userId, 'max:255'], 
             'phone' => ['required', 'regex:/^\+56\d{9}$/'],
         ];
 
