@@ -15,17 +15,12 @@ class UserGraphqlService {
                 }
             }
         `;
-        try {
-            const response = await apolloClient.query({
-                query: GET_USERS,
-                fetchPolicy: "no-cache",
-            });
+        const response = await apolloClient.query({
+            query: GET_USERS,
+            fetchPolicy: "no-cache",
+        });
 
-            return response.data.users;
-        } catch (error) {
-            console.error("Error al obtener usuarios:", error);
-            throw new Error("No se pudieron cargar los usuarios.");
-        }
+        return response.data.users;
     }
     async getUser(id) {
         const GET_USER = gql`
