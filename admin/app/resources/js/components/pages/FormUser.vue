@@ -149,6 +149,8 @@ import { reactive, ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import rules from "../../support/rules/fieldRules.js";
+import { notifySuccess } from "../../support/helpers/notification.js";
+import { handleErrors } from "../../support/errors/handleErrors.js";
 import userService from "../../services/user.service.js";
 
 const router = useRouter();
@@ -167,8 +169,6 @@ const phone = ref("");
 const errorsName = ref([]);
 const errorsEmail = ref([]);
 const errorsPhone = ref([]);
-
-const data = ref({});
 
 onMounted(() => {
     if (props.id) {
@@ -231,32 +231,47 @@ const validPhone = () => {
     return true;
 };
 
-const handleSubmit = () => {
-    const isValidName = validName();
-    const isValidEmail = validEmail();
-    const isValidPhone = validPhone();
+const handleSubmit = async () => {
+    loading.value = true;
+    try {
+        const isValidName = validName();
+        const isValidEmail = validEmail();
+        const isValidPhone = validPhone();
 
-    if (isValidName && isValidEmail && isValidPhone) {
-        console.log("validado");
-        const data = {
-          "name": name.value,
-          "email": email.value,
-          "phone": phone.value
+        if (isValidName && isValidEmail && isValidPhone) {
+            const data = {
+                name: name.value,
+                email: email.value,
+                phone: phone.value,
+            };
+            const response = await selectMethod(data);
+
+            if (response?.status === false) {
+                throw {
+                    response: {
+                        data: {
+                            message: response.message || "Error desconocido",
+                            code: response.code || 401,
+                        },
+                    },
+                };
+            }
+
+            notifySuccess(response.message);
+            goTo("/usuarios");
         }
-        const response = selectMethod(data)
-    } else {
-        console.log("no validado");
+    } catch (err) {
+        handleErrors(err);
+    } finally {
+        loading.value = false;
     }
-    // loading.value = true
-    // loading.value = false
-    // errorsName.value = []
 };
 
-const selectMethod = async (data) => {
+const selectMethod = (data) => {
     if (props.title === "Crear") {
-      return await userService.createUser(data);
+        return userService.createUser(data);
     } else if (props.title === "Editar") {
-      return await userService.updateUser(props.id, data);
+        return userService.updateUser(props.id, data);
     }
 };
 
@@ -265,11 +280,24 @@ const getUser = async () => {
     try {
         // const res = await axios.get('/users')
         const response = await userService.getUser(props.id);
+
+        if (response?.status === false) {
+            throw {
+                response: {
+                    data: {
+                        message: response.message || "Error desconocido",
+                        code: response.code || 401,
+                    },
+                },
+            };
+        }
+
         name.value = response.data.name;
         email.value = response.data.email;
         phone.value = response.data.phone;
     } catch (err) {
-        console.error(err);
+        handleErrors(err);
+        goTo("/usuarios");
     } finally {
         loading.value = false;
     }

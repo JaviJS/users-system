@@ -18,11 +18,11 @@ class UserController extends Controller
         try {
 
             $users = User::all();
-
-            return response()->json(['code' => 200, 'status' => true, 'message' => 'Listado con éxito.', 'data' => $users], 200);
+            
+            return response()->json(['code' => 200, 'status' => true, 'message' => 'Usuarios listados con éxito.', 'data' => $users]);
 
         } catch (\Throwable $th) {
-            return response()->json(['code' => $th->getCode(), 'status' => false, 'message' => 'Error al listar usuarios.'], 500);
+            return response()->json(['code' => $th->getCode(), 'status' => false, 'message' => 'Error al listar usuarios.']);
         }
 
     }
@@ -114,7 +114,7 @@ class UserController extends Controller
                 throw new Exception('Error al eliminar a usuario.', 500);
             }
 
-            return response()->json(['code' => 200, 'status' => true, 'message' => 'Usuario eliminado con éxito.', 'data' => $user]);
+            return response()->json(['code' => 200, 'status' => true, 'message' => 'Usuario eliminado con éxito.']);
 
         } catch (\Throwable $th) {
             return response()->json(['code' => $th->getCode(), 'status' => false, 'message' => $th->getMessage()]);

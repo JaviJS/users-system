@@ -24,9 +24,9 @@ class StoreUserRequest extends FormRequest
         $userId = $this->route('id');
 
         $rules = [
-            'name'  => ['required', 'regex:/^[a-zA-Záéíóú\s]+$/u'], 
+            'name'  => ['required', 'regex:/^[a-zA-ZñÑáéíóúüÁÉÍÓÚÜ ]+$/u'], 
             'email' => ['required', 'email', 'unique:users,email,'. $userId], 
-            'phone' => ['required', 'regex:/^[0-9+() ]+$/u'],
+            'phone' => ['required', 'regex:/^\+56\d{9}$/'],
         ];
 
         if ($this->isMethod('post')) {

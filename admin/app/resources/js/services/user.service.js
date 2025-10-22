@@ -17,18 +17,15 @@ class UserService {
         });
     }
     async updateUser(id, data) {
-        console.log(id, data);
         return axios.put("/users/" + id, data).then((response) => {
             return response.data;
         });
     }
-    // async updatePassword(config, data) {
-    //     return api
-    //         .put("/api/v2/external_users/update_password", data, config)
-    //         .then((response) => {
-    //             return response.data;
-    //         });
-    // }
+    async deleteUser(id) {
+        return axios.delete("/users/" + id).then((response) => {
+            return response.data;
+        });
+    }
 }
 
 export default new UserService();
