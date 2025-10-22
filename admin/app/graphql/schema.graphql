@@ -29,15 +29,15 @@ type Query {
 # INPUTS
 # -------------------
 input CreateUserInput {
-    name: String!
-    email: String!
-    phone: String!
+    name: String
+    email: String
+    phone: String
 }
 
 input UpdateUserInput {
-    name: String!
-    email: String!
-    phone: String!
+    name: String
+    email: String
+    phone: String
 }
 
 # -------------------
@@ -61,7 +61,7 @@ type UserDeleteMutationResponse {
 # MUTATIONS
 # -------------------
 type Mutation {
-    createUser(input: CreateUserInput!): UserMutationResponse
+    createUser(input: CreateUserInput): UserMutationResponse
         @field(resolver: "App\\GraphQL\\Mutations\\UserMutations@createUser")
     updateUser(
         id: ID!
@@ -78,7 +78,7 @@ type Mutation {
                     }
                 ]
             )
-        input: UpdateUserInput!
+        input: UpdateUserInput
     ): UserMutationResponse
         @field(resolver: "App\\GraphQL\\Mutations\\UserMutations@updateUser")
     deleteUser(

@@ -1,6 +1,5 @@
 <template>
     <div class="w-full p-6 md:p-10 mx-10">
-        <!-- Header -->
         <div class="flex flex-row justify-start items-center mb-6 my-auto">
             <button
                 @click="goTo('/usuarios-graph')"

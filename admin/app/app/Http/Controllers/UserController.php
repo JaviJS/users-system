@@ -13,12 +13,41 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
 
-            $users = User::all();
-            
+            $search = $request->query('search');
+
+            $searchItems = ['name', 'email', 'phone'];
+            $searchWords = explode(' ', $search);
+            $orWhere = [];
+
+            foreach ($searchWords as $word) {
+                foreach ($searchItems as $filter) {
+                    $orWhere[] = [$filter, 'LIKE', '%' . $word . '%'];
+                }
+            }
+
+            $users = User::query()
+                ->when(!empty($searchWords), function ($query) use ($searchWords, $searchItems) {
+                    $query->where(function ($q) use ($searchWords, $searchItems) {
+
+                        foreach ($searchWords as $word) {
+                            $q->where(function ($q2) use ($word, $searchItems) {
+                                foreach ($searchItems as $index => $field) {
+                                    if ($index === 0) {
+                                        $q2->where($field, 'LIKE', "%$word%");
+                                    } else {
+                                        $q2->orWhere($field, 'LIKE', "%$word%");
+                                    }
+                                }
+                            });
+                        }
+                    });
+                })
+                ->get();
+
             return response()->json(['code' => 200, 'status' => true, 'message' => 'Usuarios listados con éxito.', 'data' => $users]);
 
         } catch (\Throwable $th) {
@@ -81,7 +110,7 @@ class UserController extends Controller
                 throw new Exception('Usuario no encontrado', 404);
             }
 
-            $user =  $user->update($request->all());
+            $user = $user->update($request->all());
 
             if (!$user) {
                 throw new Exception('Error al modificar usuario.', 500);
@@ -100,7 +129,7 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-         try {
+        try {
 
             $user = User::where('id', $id)->first();
 
@@ -108,7 +137,7 @@ class UserController extends Controller
                 throw new Exception('Usuario no encontrado', 404);
             }
 
-            $user =  $user->delete();
+            $user = $user->delete();
 
             if (!$user) {
                 throw new Exception('Error al eliminar a usuario.', 500);

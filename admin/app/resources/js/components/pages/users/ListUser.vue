@@ -1,6 +1,5 @@
 <template>
     <div class="rounded-lg p-6 md:p-10 max-w-full mx-auto">
-        <!-- Header -->
         <div
             class="my-auto mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0"
         >
@@ -14,8 +13,6 @@
                 Nuevo usuario
             </button>
         </div>
-
-        <!-- Search -->
         <div
             class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center"
         >
@@ -28,8 +25,6 @@
                 />
             </div>
         </div>
-
-        <!-- Table -->
         <div class="overflow-x-auto bg-white rounded-lg">
             <table class="min-w-full table-auto">
                 <thead>
@@ -45,7 +40,7 @@
                 </thead>
                 <tbody class="text-sm whitespace-normal break-words">
                     <tr
-                        v-for="user in filteredUsers"
+                        v-for="user in users"
                         :key="user.id"
                         class="border-b border-gray-200 hover:bg-gray-100"
                     >
@@ -136,7 +131,7 @@
                             </div>
                         </td>
                     </tr>
-                    <tr v-if="!filteredUsers.length">
+                    <tr v-if="!users.length">
                         <td colspan="10" class="py-3 px-6 text-center">
                             No hay registros
                         </td>
@@ -144,8 +139,6 @@
                 </tbody>
             </table>
         </div>
-
-        <!-- Loading -->
         <div
             v-if="loading"
             class="flex absolute inset-0 bg-white/50 z-50 items-center justify-center"
@@ -171,19 +164,18 @@
                 ></path>
             </svg>
         </div>
-        <!-- <Loading :show="loading" /> -->
+        <Loading :show="loading" />
     </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
 import userService from "../../../services/user.service.js";
 import { handleErrors } from "../../../support/errors/handleErrors.js";
 import { notifySuccess } from "../../../support/helpers/notification.js";
 import Loading from "../../layout/Loading.vue";
-// import userGraphql from '../../services/user.graphql.js'
+import debounce from "lodash/debounce";
 import Swal from "sweetalert2";
 
 const router = useRouter();
@@ -192,12 +184,10 @@ const users = ref([]);
 const search = ref("");
 const loading = ref(false);
 
-const getUsers = async () => {
+const getUsers = async (search = "") => {
     loading.value = true;
     try {
-        const response = await userService.getUsers();
-
-        // const test = await userGraphql.getUsers();+
+        const response = await userService.getUsers(search);
         if (response?.status === false) {
             throw {
                 response: {
@@ -217,14 +207,12 @@ const getUsers = async () => {
     }
 };
 
-const filteredUsers = computed(() => {
-    if (!search.value) return users.value;
-    return users.value.filter(
-        (user) =>
-            user.name.toLowerCase().includes(search.value.toLowerCase()) ||
-            user.email.toLowerCase().includes(search.value.toLowerCase()) ||
-            user.phone.toLowerCase().includes(search.value.toLowerCase())
-    );
+const debouncedFetch = debounce((val) => {
+    getUsers(val);
+}, 500);
+
+watch(search, (newVal) => {
+    debouncedFetch(newVal);
 });
 
 const goTo = (url) => {
@@ -277,11 +265,11 @@ const deleteUser = async (user) => {
 function formatDateTime(dateTimeStr) {
     if (!dateTimeStr) return "";
 
-    const date = new Date(dateTimeStr.replace(" ", "T")); // convertimos a formato ISO
+    const date = new Date(dateTimeStr.replace(" ", "T"));
     if (isNaN(date)) return dateTimeStr;
 
     const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // los meses van de 0 a 11
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
 
     const hours = String(date.getHours()).padStart(2, "0");

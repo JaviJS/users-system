@@ -1,10 +1,16 @@
 import axios from "axios";
 
 class UserService {
-    async getUsers() {
-        return axios.get("/users").then((response) => {
-            return response.data;
-        });
+    async getUsers(search = "") {
+        return axios
+            .get("/users", {
+                params: {
+                    search: search,
+                },
+            })
+            .then((response) => {
+                return response.data;
+            });
     }
     async getUser(id) {
         return axios.get("/users/" + id).then((response) => {

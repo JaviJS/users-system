@@ -1,6 +1,5 @@
 <template>
     <div class="rounded-lg p-6 md:p-10 max-w-full mx-auto">
-        <!-- Header -->
         <div
             class="my-auto mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0"
         >
@@ -14,22 +13,6 @@
                 Nuevo usuario
             </button>
         </div>
-
-        <!-- Search -->
-        <div
-            class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center"
-        >
-            <div class="w-full mb-4 md:mb-0 flex items-center space-x-2">
-                <input
-                    v-model="search"
-                    type="text"
-                    placeholder="Buscar usuarios..."
-                    class="w-full px-4 py-2 rounded-md border border-gray-300 bg-white outline-none hover:ring-2 hover:ring-primary focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-            </div>
-        </div>
-
-        <!-- Table -->
         <div class="overflow-x-auto bg-white rounded-lg">
             <table class="min-w-full table-auto">
                 <thead>
@@ -45,7 +28,7 @@
                 </thead>
                 <tbody class="text-sm whitespace-normal break-words">
                     <tr
-                        v-for="user in filteredUsers"
+                        v-for="user in users"
                         :key="user.id"
                         class="border-b border-gray-200 hover:bg-gray-100"
                     >
@@ -140,7 +123,7 @@
                             </div>
                         </td>
                     </tr>
-                    <tr v-if="!filteredUsers.length">
+                    <tr v-if="!users.length">
                         <td colspan="10" class="py-3 px-6 text-center">
                             No hay registros
                         </td>
@@ -148,8 +131,6 @@
                 </tbody>
             </table>
         </div>
-
-        <!-- Loading -->
         <div
             v-if="loading"
             class="flex absolute inset-0 bg-white/50 z-50 items-center justify-center"
@@ -175,15 +156,13 @@
                 ></path>
             </svg>
         </div>
-        <!-- <Loading :show="loading" /> -->
+        <Loading :show="loading" />
     </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
-import userService from "../../../services/user.service.js";
 import { handleErrorsGraph } from "../../../support/errors/handleErrors.js";
 import { notifySuccess } from "../../../support/helpers/notification.js";
 import Loading from "../../layout/Loading.vue";
@@ -197,28 +176,18 @@ const search = ref("");
 const loading = ref(false);
 
 const getUsers = async () => {
+    console.log("asdasd")
     loading.value = true;
     try {
-        users.value = [];
         const response = await userGraphql.getUsers();
-        users.value = response;
-        console.log(users.value);
+        console.log(response)
+        users.value = response || [];
     } catch (err) {
         handleErrorsGraph(err);
     } finally {
         loading.value = false;
     }
 };
-
-const filteredUsers = computed(() => {
-    if (!search.value) return users.value;
-    return users.value.filter(
-        (user) =>
-            user.name.toLowerCase().includes(search.value.toLowerCase()) ||
-            user.email.toLowerCase().includes(search.value.toLowerCase()) ||
-            user.phone.toLowerCase().includes(search.value.toLowerCase())
-    );
-});
 
 const goTo = (url) => {
     router.push(url);
@@ -257,7 +226,7 @@ const deleteUser = async (user) => {
                 }
 
                 notifySuccess(response.message);
-                getUsers();
+                await getUsers();
             } catch (err) {
                 handleErrorsGraph(err);
             } finally {
@@ -270,11 +239,11 @@ const deleteUser = async (user) => {
 function formatDateTime(dateTimeStr) {
     if (!dateTimeStr) return "";
 
-    const date = new Date(dateTimeStr.replace(" ", "T")); // convertimos a formato ISO
+    const date = new Date(dateTimeStr.replace(" ", "T"));
     if (isNaN(date)) return dateTimeStr;
 
     const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // los meses van de 0 a 11
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
 
     const hours = String(date.getHours()).padStart(2, "0");
