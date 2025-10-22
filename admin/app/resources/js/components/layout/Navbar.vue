@@ -46,8 +46,9 @@
                     >Usuarios</a
                 >
                 <a
-                    href="/usuarios"
+                    href="/usuarios-graph"
                     class="w-full block py-2 pl-3 pr-4 mt-2 hover:bg-blue-900 rounded-lg"
+                    :class="currentRouteName === '/usuarios-graph' ? 'bg-blue-900' : ''"
                     aria-current="page"
                     >Usuarios graph</a
                 >

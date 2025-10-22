@@ -171,6 +171,7 @@
                 ></path>
             </svg>
         </div>
+        <!-- <Loading :show="loading" /> -->
     </div>
 </template>
 
@@ -178,9 +179,10 @@
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-import userService from "../../services/user.service.js";
-import { handleErrors } from "../../support/errors/handleErrors.js";
-import { notifySuccess } from "../../support/helpers/notification.js";
+import userService from "../../../services/user.service.js";
+import { handleErrors } from "../../../support/errors/handleErrors.js";
+import { notifySuccess } from "../../../support/helpers/notification.js";
+import Loading from "../../layout/Loading.vue";
 // import userGraphql from '../../services/user.graphql.js'
 import Swal from "sweetalert2";
 
@@ -242,31 +244,32 @@ const deleteUser = async (user) => {
         confirmButtonColor: "#DC2626",
         cancelButtonColor: "#B5B5B5",
         confirmButtonText: "Eliminar",
-        reverseButtons: true
+        reverseButtons: true,
     }).then(async (result) => {
-        if (result) {
-          loading.value = true;
-          try {
-              const response = await userService.deleteUser(user.id);
+        if (result.isConfirmed) {
+            loading.value = true;
+            try {
+                const response = await userService.deleteUser(user.id);
 
-              if (response?.status === false) {
-                  throw {
-                      response: {
-                          data: {
-                              message: response.message || "Error desconocido",
-                              code: response.code || 401,
-                          },
-                      },
-                  };
-              }
+                if (response?.status === false) {
+                    throw {
+                        response: {
+                            data: {
+                                message:
+                                    response.message || "Error desconocido",
+                                code: response.code || 401,
+                            },
+                        },
+                    };
+                }
 
-              notifySuccess(response.message);
-              getUsers();
-          } catch (err) {
-              handleErrors(err);
-          } finally {
-              loading.value = false;
-          }
+                notifySuccess(response.message);
+                getUsers();
+            } catch (err) {
+                handleErrors(err);
+            } finally {
+                loading.value = false;
+            }
         }
     });
 };

@@ -141,6 +141,7 @@
                 ></path>
             </svg>
         </div>
+        <Loading :show="loading" />
     </div>
 </template>
 
@@ -148,10 +149,11 @@
 import { reactive, ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-import rules from "../../support/rules/fieldRules.js";
-import { notifySuccess } from "../../support/helpers/notification.js";
-import { handleErrors } from "../../support/errors/handleErrors.js";
-import userService from "../../services/user.service.js";
+import rules from "../../../support/rules/fieldRules.js";
+import { notifySuccess } from "../../../support/helpers/notification.js";
+import { handleErrors } from "../../../support/errors/handleErrors.js";
+import Loading from "../../layout/Loading.vue";
+import userService from "../../../services/user.service.js";
 
 const router = useRouter();
 const props = defineProps({
